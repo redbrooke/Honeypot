@@ -1,13 +1,15 @@
 # Terraform is a declarative language made of different blocks. These blocks 'declare' pieces of infrastructure. Full list of block types:
 #
-#   Terraform Block.
-#   Provider Block.
-#   Data Block.
-#   Resource Block.
-#   Module Block.
-#   Variable Block.
-#   Output Block.
-#   Locals Block.
+#   Terraform Block - Set versions etc.
+#   Provider Block - Sets providers, like an import in Python. 
+#   Resource Block - Define a resource for terraform to use. The meat of a terraform project.
+#   Module Block - A logical contianer to build out a single component, for example all the architecture for a single web service, (http server, database, storage blob etc)
+#   Output Block - Captures return values 
+#   Variable Block - variables are for input. Things that you can change via inputs (like a vars file). 
+#   Locals Block - Variables, but locals are "private". You can only change them by altering the code. 
+#   Data Block - Access data from outside of terraform, e.g pulling state info from a cloud provider.
+#   Provisioners block and Dynamic blocks also exist.
+#
 #
 #########################################
 # Configure the Azure provider as per the docs
