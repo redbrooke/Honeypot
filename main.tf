@@ -1,3 +1,15 @@
+# Terraform is a declarative language made of different blocks. These blocks 'declare' pieces of infrastructure. Full list of block types:
+#
+#   Terraform Block.
+#   Provider Block.
+#   Data Block.
+#   Resource Block.
+#   Module Block.
+#   Variable Block.
+#   Output Block.
+#   Locals Block.
+#
+#########################################
 # Configure the Azure provider as per the docs
 # Read more here: https://developer.hashicorp.com/terraform/tutorials/azure-get-started/azure-build
 # A guide on Sentinel and Terraform can be found here - https://techcommunity.microsoft.com/blog/azureinfrastructureblog/cicd-implementation-for-azure-sentinel-using-terraform/4413220
