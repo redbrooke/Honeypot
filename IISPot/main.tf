@@ -15,6 +15,10 @@ provider "azurerm" {
   features {}
 }
 
+#TODO:
+# Rename HoneyProjectPot
+# Remove all references to HoneyProjectPot and set to new name
+# Change all examples of rg to the new groupname.
 
 #ADJUST THIS TO BE THE USED RESOURCE GROUP FOR EVERYTHING
 resource "azurerm_resource_group" "HoneyProjectPots" {
