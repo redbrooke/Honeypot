@@ -15,6 +15,14 @@ provider "azurerm" {
   features {}
 }
 
+
+#ADJUST THIS TO BE THE USED RESOURCE GROUP FOR EVERYTHING
+resource "azurerm_resource_group" "HoneyProjectPots" {
+  name     = "HoneypotGroup"
+  location = "ukwest"
+  tag = {"Project" = "Honeypot"}
+}
+
 #############################
 # Create the VM
 
