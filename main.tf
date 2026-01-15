@@ -33,19 +33,11 @@ provider "azurerm" {
 }
 
 ######################################
-# Generate two resource groups and set the location to Wales (not london): 
-# Two groups made to make it easier to identify and dump honeypots, the whole group can be easily removed. 
+# Generate a resource groups and set the location to Wales (not london): 
 
 # For sentinel
 resource "azurerm_resource_group" "HoneyProject" {
   name     = "SentinelGroup"
-  location = "ukwest"
-  tag = {"Project" = "Honeypot"}
-}
-
-# For the pots
-resource "azurerm_resource_group" "HoneyProjectPots" {
-  name     = "HoneypotGroup"
   location = "ukwest"
   tag = {"Project" = "Honeypot"}
 }
