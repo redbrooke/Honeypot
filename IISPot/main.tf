@@ -19,6 +19,7 @@ provider "azurerm" {
 # Rename HoneyProjectPot
 # Remove all references to HoneyProjectPot and set to new name
 # Change all examples of rg to the new groupname.
+# Configure the data collection rule to feed into the correct LAW.
 
 #ADJUST THIS TO BE THE USED RESOURCE GROUP FOR EVERYTHING
 resource "azurerm_resource_group" "HoneyProjectPots" {
@@ -189,3 +190,64 @@ resource "azurerm_storage_account" "honeypot_storage_account" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
+
+# Install the azure monitoring agent for windows
+# Extension as per https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension
+# Extensions allow you to dump post install stuff onto a VM, similar to how the web server was set up. Ref - https://learn.microsoft.com/en-us/cli/azure/vm/extension?view=azure-cli-latest
+
+resource "azurerm_virtual_machine_extension" "ama_windows" {
+  name                       = "AzureMonitorWindowsAgent"
+  virtual_machine_id         = azurerm_windows_virtual_machine.main.id
+  publisher                  = "Microsoft.Azure.Monitor"
+  type                       = "AzureMonitorWindowsAgent"
+  type_handler_version       = "1.0"
+  auto_upgrade_minor_version = true
+}
+
+
+
+# Creates a data collection rule.
+# ref : https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule_association
+
+resource "azurerm_monitor_data_collection_rule" "dcr" {
+  name                = "dcr-vm-logs"
+  location            = azurerm_resource_group.HoneyProjectPots.location
+  resource_group_name = azurerm_resource_group.HoneyProjectPots.name
+
+# SET UP THIS WITH THE PREVIOUSLY CREATED LAW
+# FIX MEEEEEEEEEEEEEEEEEEEEEEEEEEE
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+  destinations {
+    log_analytics {
+      workspace_resource_id = azurerm_log_analytics_workspace.law.id
+      name                  = "law-destination"
+    }
+  }
+
+  data_sources {
+    windows_event_log {
+      name    = "windows-events"
+      streams = ["Microsoft-WindowsEvent"]
+
+      x_path_queries = [
+        "Security!*",
+        "System!*",
+        "Application!*"
+      ]
+    }
+  }
+
+  data_flow {
+    streams      = ["Microsoft-WindowsEvent"]
+    destinations = ["law-destination"]
+  }
+}
+
+# Associate the DCR with the VM
+
+resource "azurerm_monitor_data_collection_rule_association" "vm_assoc" {
+  name                    = "vm-dcr-association"
+  target_resource_id      = azurerm_windows_virtual_machine.main.id
+  data_collection_rule_id = azurerm_monitor_data_collection_rule.dcr.id
+}
+
