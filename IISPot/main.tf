@@ -25,7 +25,7 @@ provider "azurerm" {
 resource "azurerm_resource_group" "HoneyProjectPots" {
   name     = "HoneypotGroup"
   location = "ukwest"
-  tag = {"Project" = "Honeypot"}
+  tags = {"Project" = "Honeypot"}
 }
 
 ################################################
@@ -113,7 +113,7 @@ resource "azurerm_network_interface_security_group_association" "assignNSG" {
 
 # Create virtual machine
 resource "azurerm_windows_virtual_machine" "main" {
-  name                  = "${var.prefix}-vm"
+  name                  = "IIS-vm"
   admin_username        = "azureuser"
   admin_password        = random_password.password.result
   location              = azurerm_resource_group.rg.location
@@ -175,10 +175,10 @@ resource "random_password" "password" {
   special     = true
 }
 
-resource "random_pet" "prefix" {
-  prefix = var.prefix
-  length = 1
-}
+#resource "random_pet" "prefix" {
+#  prefix = var.prefix
+#  length = 1
+#}
 
 #####################################################################
 # Create storage account for boot diagnostics

@@ -39,7 +39,7 @@ provider "azurerm" {
 resource "azurerm_resource_group" "HoneyProject" {
   name     = "SentinelGroup"
   location = "ukwest"
-  tag = {"Project" = "Honeypot"}
+  tags = {"Project" = "Honeypot"}
 }
 
 ########################################
@@ -78,7 +78,8 @@ resource "azurerm_log_analytics_workspace" "law" {
 
 # Puts sentinel in the LAW (log analysis workbench).
 resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel" {
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.IAmTheLaw.id
+  #log_analytics_
+  workspace_id = azurerm_log_analytics_workspace.IAmTheLaw.id
 }
 
 ########################################
@@ -98,7 +99,6 @@ QUERY
   tactics                   = ["InitialAccess"]
   trigger_operator           = "GreaterThan"
   trigger_threshold          = 5
-  frequency                  = "PT5M"
   query_period               = "PT5M"
   enabled                    = true
 }
