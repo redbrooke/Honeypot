@@ -16,14 +16,10 @@ provider "azurerm" {
 }
 
 #TODO:
-# Rename HoneyProjectPot
-# Remove all references to HoneyProjectPot and set to new name
-# Change all examples of rg to the new groupname.
-# Configure the data collection rule to feed into the correct LAW.
+# Diagnose if the data collection rule is connected to the LAW created in the parent directory. Outputs may be needed.
 
-#ADJUST THIS TO BE THE USED RESOURCE GROUP FOR EVERYTHING
-resource "azurerm_resource_group" "HoneyProjectPots" {
-  name     = "HoneypotGroup"
+resource "azurerm_resource_group" "IISPotGroup" {
+  name     = "IISGroup"
   location = "ukwest"
   tags = {"Project" = "Honeypot"}
 }
@@ -36,14 +32,14 @@ resource "azurerm_resource_group" "HoneyProjectPots" {
 resource "azurerm_virtual_network" "honeypot_network" {
   name                = "Honeypot-vnet"
   address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.HoneyProjectPots.location
-  resource_group_name = azurerm_resource_group.HoneyProjectPots.name
+  location            = azurerm_resource_group.IISPotGroup.location
+  resource_group_name = azurerm_resource_group.IISPotGroup.name
 }
 
 # Create subnet
 resource "azurerm_subnet" "honeypot_subnet" {
   name                 = "$Honeypot-subnet"
-  resource_group_name = azurerm_resource_group.HoneyProjectPots.name
+  resource_group_name = azurerm_resource_group.IISPotGroup.name
   virtual_network_name = azurerm_virtual_network.honeypot_network.name
   address_prefixes     = ["10.0.1.0/24"]
 }
@@ -51,16 +47,16 @@ resource "azurerm_subnet" "honeypot_subnet" {
 # Create public IPs
 resource "azurerm_public_ip" "IISPot_public_ip" {
   name                = "$IISPot-public-ip"
-  location            = azurerm_resource_group.HoneyProjectPots.location
-  resource_group_name = azurerm_resource_group.HoneyProjectPots.name
+  location            = azurerm_resource_group.IISPotGroup.location
+  resource_group_name = azurerm_resource_group.IISPotGroup.name
   allocation_method   = "Dynamic"
 }
 
 # Create Network Security Group and rules
 resource "azurerm_network_security_group" "honeypot_nsg" {
   name                = "$IISPot-nsg"
-  location            = azurerm_resource_group.HoneyProjectPots.location
-  resource_group_name = azurerm_resource_group.HoneyProjectPots.name
+  location            = azurerm_resource_group.IISPotGroup.location
+  resource_group_name = azurerm_resource_group.IISPotGroup.name
 
   security_rule {
     name                       = "RDP"
@@ -89,8 +85,8 @@ resource "azurerm_network_security_group" "honeypot_nsg" {
 # Create network interface
 resource "azurerm_network_interface" "IISPot_nic" {
   name                = "$IISPot-nic"
-  location            = azurerm_resource_group.HoneyProjectPots.location
-  resource_group_name = azurerm_resource_group.HoneyProjectPots.name
+  location            = azurerm_resource_group.IISPotGroup.location
+  resource_group_name = azurerm_resource_group.IISPotGroup.name
 
   ip_configuration {
     name                          = "IISPot_nic_configuration"
@@ -185,8 +181,8 @@ resource "random_password" "password" {
 
 resource "azurerm_storage_account" "honeypot_storage_account" {
   name                     = "bootlogs"
-  location            = azurerm_resource_group.HoneyProjectPots.location
-  resource_group_name = azurerm_resource_group.HoneyProjectPots.name
+  location            = azurerm_resource_group.IISPotGroup.location
+  resource_group_name = azurerm_resource_group.IISPotGroup.name
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
@@ -204,22 +200,18 @@ resource "azurerm_virtual_machine_extension" "ama_windows" {
   auto_upgrade_minor_version = true
 }
 
-
-
 # Creates a data collection rule.
 # ref : https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule_association
 
 resource "azurerm_monitor_data_collection_rule" "dcr" {
   name                = "dcr-vm-logs"
-  location            = azurerm_resource_group.HoneyProjectPots.location
-  resource_group_name = azurerm_resource_group.HoneyProjectPots.name
+  location            = azurerm_resource_group.IISPotGroup.location
+  resource_group_name = azurerm_resource_group.IISPotGroup.name
 
-# SET UP THIS WITH THE PREVIOUSLY CREATED LAW
-# FIX MEEEEEEEEEEEEEEEEEEEEEEEEEEE
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+# Creates a destination for logs to be sent to. 
   destinations {
     log_analytics {
-      workspace_resource_id = azurerm_log_analytics_workspace.law.id
+      workspace_resource_id = azurerm_log_analytics_workspace.IAmTheLaw.id # SET UP THIS WITH THE PREVIOUSLY CREATED LAW azurerm_log_analytics_workspace.law.id
       name                  = "law-destination"
     }
   }
