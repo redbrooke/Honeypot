@@ -4,7 +4,10 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0.2"
+      #version = "~> 3.0.2"
+    }
+    random={
+      source = "hashicorp/random"
     }
   }
 
@@ -112,9 +115,9 @@ resource "azurerm_windows_virtual_machine" "main" {
   name                  = "IIS-vm"
   admin_username        = "azureuser"
   admin_password        = random_password.password.result
-  location              = azurerm_resource_group.rg.location
-  resource_group_name   = azurerm_resource_group.rg.name
-  network_interface_ids = [azurerm_network_interface.my_terraform_nic.id]
+  location              = azurerm_resource_group.IISPotGroup.location
+  resource_group_name   = azurerm_resource_group.IISPotGroup.name
+  network_interface_ids = [azurerm_network_interface.IISPot_nic.id]
   size                  = "Standard_DS1_v2"
 
   os_disk {
@@ -132,13 +135,13 @@ resource "azurerm_windows_virtual_machine" "main" {
 
 
   boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.my_storage_account.primary_blob_endpoint
+    storage_account_uri = azurerm_storage_account.honeypot_storage_account.primary_blob_endpoint
   }
 }
 
 # Install IIS web server to the virtual machine
 resource "azurerm_virtual_machine_extension" "web_server_install" {
-  name                       = "${random_pet.prefix.id}-wsi"
+  name                       = "IISPotWebserverInstall"
   virtual_machine_id         = azurerm_windows_virtual_machine.main.id
   publisher                  = "Microsoft.Compute"
   type                       = "CustomScriptExtension"
@@ -156,7 +159,7 @@ resource "azurerm_virtual_machine_extension" "web_server_install" {
 resource "random_id" "random_id" {
   keepers = {
     # Generate a new ID only when a new resource group is defined
-    resource_group = azurerm_resource_group.rg.name
+    resource_group = azurerm_resource_group.IISPotGroup.name
   }
 
   byte_length = 8
@@ -211,7 +214,7 @@ resource "azurerm_monitor_data_collection_rule" "dcr" {
 # Creates a destination for logs to be sent to. 
   destinations {
     log_analytics {
-      workspace_resource_id = azurerm_log_analytics_workspace.IAmTheLaw.id # SET UP THIS WITH THE PREVIOUSLY CREATED LAW azurerm_log_analytics_workspace.law.id
+      workspace_resource_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinel.workspace_id # SET UP THIS WITH THE PREVIOUSLY CREATED LAW azurerm_log_analytics_workspace.law.id
       name                  = "law-destination"
     }
   }

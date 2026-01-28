@@ -20,7 +20,7 @@
 terraform {
   required_providers {
     azurerm = {
-      source  = "hashicorp/azurerm"
+      source = "hashicorp/azurerm"
       #version = "~> 3.0.2"
       # VERSION REQUIRED MUST BE ABOVE 4.58.0.
     }
@@ -40,33 +40,33 @@ provider "azurerm" {
 resource "azurerm_resource_group" "HoneyProject" {
   name     = "SentinelGroup"
   location = "ukwest"
-  tags = {"Project" = "Honeypot"}
+  tags     = { "Project" = "Honeypot" }
 }
 
 ########################################
 #Creating the Sentinel workspace, as per the docs
 # Docs - https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace
- #                      ______
- #                   ,-~   _  ^^~-.,
- #                 ,^        -,____ ^,         ,/\/\/\,
- #                /           (____)  |      S~        ~7
- #               ;  .---._    | | || _|     S  I AM THE  Z
- #               | |      ~-.,\ | |!/ |     /_   LAW!   _\ 
- #               ( |    ~<-.,_^\|_7^ ,|     _//_      _\
- #               | |      ", 77>   (T/|   _/'   \/\/\/
- #               |  \_      )/<,/^\)i(|
- #               (    ^~-,  |________||
- #               ^!,_    / /, ,'^~^',!!_,..---.
- #                \_ "-./ /   (-~^~-))' =,__,..>-,
- #                  ^-,__/#w,_  '^' /~-,_/^\      )
- #               /\  ( <_    ^~~--T^ ~=, \  \_,-=~^\
- #  .-==,    _,=^_,.-"_  ^~*.(_  /_)    \ \,=\      )
- # /-~;  \,-~ .-~  _,/ \    ___[8]_      \ T_),--~^^)
- #   _/   \,,..==~^_,.=,\   _.-~O   ~     \_\_\_,.-=}
- # ,{       _,.-<~^\  \ \\      ()  .=~^^~=. \_\_,./
- #,{ ^T^ _ /  \  \  \  \ \)    [|   \oDREDD >
- #  ^T~ ^ { \  \ _\.-|=-T~\\    () ()\<||>,' )
- #   +     \ |=~T  !       Y    [|()  \ ,'  /
+#                      ______
+#                   ,-~   _  ^^~-.,
+#                 ,^        -,____ ^,         ,/\/\/\,
+#                /           (____)  |      S~        ~7
+#               ;  .---._    | | || _|     S  I AM THE  Z
+#               | |      ~-.,\ | |!/ |     /_   LAW!   _\ 
+#               ( |    ~<-.,_^\|_7^ ,|     _//_      _\
+#               | |      ", 77>   (T/|   _/'   \/\/\/
+#               |  \_      )/<,/^\)i(|
+#               (    ^~-,  |________||
+#               ^!,_    / /, ,'^~^',!!_,..---.
+#                \_ "-./ /   (-~^~-))' =,__,..>-,
+#                  ^-,__/#w,_  '^' /~-,_/^\      )
+#               /\  ( <_    ^~~--T^ ~=, \  \_,-=~^\
+#  .-==,    _,=^_,.-"_  ^~*.(_  /_)    \ \,=\      )
+# /-~;  \,-~ .-~  _,/ \    ___[8]_      \ T_),--~^^)
+#   _/   \,,..==~^_,.=,\   _.-~O   ~     \_\_\_,.-=}
+# ,{       _,.-<~^\  \ \\      ()  .=~^^~=. \_\_,./
+#,{ ^T^ _ /  \  \  \  \ \)    [|   \oDREDD >
+#  ^T~ ^ { \  \ _\.-|=-T~\\    () ()\<||>,' )
+#   +     \ |=~T  !       Y    [|()  \ ,'  /
 
 resource "azurerm_log_analytics_workspace" "law" {
   name                = "IAmTheLaw"
@@ -98,11 +98,10 @@ SigninLogs
 | summarize count() by bin(TimeGenerated, 5m), UserPrincipalName
 QUERY
   severity                   = "Medium"
-  tactics                   = ["InitialAccess"]
+  tactics                    = ["InitialAccess"]
   trigger_operator           = "GreaterThan"
   trigger_threshold          = 5
-  #query_period               = "PT5M" #leave to default?
-  enabled                    = true
+  enabled = true
 }
 
 

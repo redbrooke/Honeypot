@@ -29,3 +29,11 @@ $Env:ARM_TENANT_ID = "<TENANT_VALUE>"
 terraform init -upgrade
 
 terraform plan -out main.tfplan
+
+terraform apply
+
+
+
+TODO:
+
+1. Consider adding a backend that writes the tfstate file to a storage blon - https://developer.hashicorp.com/terraform/language/backend/azurerm
