@@ -81,7 +81,7 @@ resource "azurerm_log_analytics_workspace" "law" {
 resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel" {
   #log_analytics_
   workspace_id = azurerm_log_analytics_workspace.law.id
-  customer_managed_key_enabled = false
+  #customer_managed_key_enabled = false
 }
 
 ########################################
@@ -90,7 +90,7 @@ resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel" {
 
 resource "azurerm_sentinel_alert_rule_scheduled" "sign_in_alert" {
   name                       = "sign-in-failure-alert"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
+  log_analytics_workspace_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinel.workspace_id
   display_name               = "Multiple Sign-in Failures"
   query                      = <<QUERY
 SigninLogs
@@ -101,7 +101,7 @@ QUERY
   tactics                   = ["InitialAccess"]
   trigger_operator           = "GreaterThan"
   trigger_threshold          = 5
-  query_period               = "PT5M"
+  #query_period               = "PT5M" #leave to default?
   enabled                    = true
 }
 
