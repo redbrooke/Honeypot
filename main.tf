@@ -39,8 +39,7 @@ provider "azurerm" {
 # For sentinel
 resource "azurerm_resource_group" "HoneyProject" {
   name     = "SentinelGroup"
-  #location = "ukwest"
-  location = "West Uk"
+  location = "ukwest"
   tags = {"Project" = "Honeypot"}
 }
 
