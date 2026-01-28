@@ -37,3 +37,5 @@ terraform apply
 TODO:
 
 1. Consider adding a backend that writes the tfstate file to a storage blon - https://developer.hashicorp.com/terraform/language/backend/azurerm
+
+2. WATCH ME - https://www.youtube.com/watch?v=GSXx8AZjKK4 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
