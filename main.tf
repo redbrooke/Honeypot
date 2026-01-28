@@ -21,7 +21,8 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0.2"
+      #version = "~> 3.0.2"
+      # VERSION REQUIRED MUST BE ABOVE 4.58.0.
     }
   }
 
@@ -38,7 +39,8 @@ provider "azurerm" {
 # For sentinel
 resource "azurerm_resource_group" "HoneyProject" {
   name     = "SentinelGroup"
-  location = "ukwest"
+  #location = "ukwest"
+  location = "West Uk"
   tags = {"Project" = "Honeypot"}
 }
 
@@ -79,7 +81,8 @@ resource "azurerm_log_analytics_workspace" "law" {
 # Puts sentinel in the LAW (log analysis workbench).
 resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel" {
   #log_analytics_
-  workspace_id = azurerm_log_analytics_workspace.IAmTheLaw.id
+  workspace_id = azurerm_log_analytics_workspace.law.id
+  customer_managed_key_enabled = false
 }
 
 ########################################

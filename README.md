@@ -17,4 +17,6 @@ az account list
 
 az account set --subscription "<SUBID>-subscription-id"
 
- 
+terraform init -upgrade
+
+terraform plan -out main.tfplan
