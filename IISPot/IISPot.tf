@@ -23,9 +23,16 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "IISPotGroup" {
   name     = "IISGroup"
-  location = "ukwest"
+  location = "ukeast"
+  # NO VMS in UKWEST
   tags = {"Project" = "Honeypot"}
 }
+
+data "azurerm_log_analytics_workspace" "sentinel" {
+  name                = "IAmTheLaw"
+  resource_group_name = "SentinelGroup"
+}
+
 
 ################################################
 # Network setup
@@ -33,7 +40,7 @@ resource "azurerm_resource_group" "IISPotGroup" {
 
 # Create virtual network
 resource "azurerm_virtual_network" "honeypot_network" {
-  name                = "Honeypot-vnet"
+  name                = "HoneypotVnet"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.IISPotGroup.location
   resource_group_name = azurerm_resource_group.IISPotGroup.name
@@ -41,7 +48,7 @@ resource "azurerm_virtual_network" "honeypot_network" {
 
 # Create subnet
 resource "azurerm_subnet" "honeypot_subnet" {
-  name                 = "$Honeypot-subnet"
+  name                 = "HoneypotSubnet"
   resource_group_name = azurerm_resource_group.IISPotGroup.name
   virtual_network_name = azurerm_virtual_network.honeypot_network.name
   address_prefixes     = ["10.0.1.0/24"]
@@ -49,15 +56,15 @@ resource "azurerm_subnet" "honeypot_subnet" {
 
 # Create public IPs
 resource "azurerm_public_ip" "IISPot_public_ip" {
-  name                = "$IISPot-public-ip"
+  name                = "IISPotPublicIp"
   location            = azurerm_resource_group.IISPotGroup.location
   resource_group_name = azurerm_resource_group.IISPotGroup.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 }
 
 # Create Network Security Group and rules
 resource "azurerm_network_security_group" "honeypot_nsg" {
-  name                = "$IISPot-nsg"
+  name                = "IISPotNsg"
   location            = azurerm_resource_group.IISPotGroup.location
   resource_group_name = azurerm_resource_group.IISPotGroup.name
 
@@ -87,7 +94,7 @@ resource "azurerm_network_security_group" "honeypot_nsg" {
 
 # Create network interface
 resource "azurerm_network_interface" "IISPot_nic" {
-  name                = "$IISPot-nic"
+  name                = "IISPotNic"
   location            = azurerm_resource_group.IISPotGroup.location
   resource_group_name = azurerm_resource_group.IISPotGroup.name
 
@@ -183,7 +190,7 @@ resource "random_password" "password" {
 # Create storage account for boot diagnostics
 
 resource "azurerm_storage_account" "honeypot_storage_account" {
-  name                     = "bootlogs"
+  name                     = "bootylogs4will"
   location            = azurerm_resource_group.IISPotGroup.location
   resource_group_name = azurerm_resource_group.IISPotGroup.name
   account_tier             = "Standard"
@@ -214,7 +221,7 @@ resource "azurerm_monitor_data_collection_rule" "dcr" {
 # Creates a destination for logs to be sent to. 
   destinations {
     log_analytics {
-      workspace_resource_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinel.workspace_id # SET UP THIS WITH THE PREVIOUSLY CREATED LAW azurerm_log_analytics_workspace.law.id
+      workspace_resource_id = data.azurerm_log_analytics_workspace.sentinel.id # SET UP THIS WITH THE PREVIOUSLY CREATED LAW azurerm_log_analytics_workspace.law.id
       name                  = "law-destination"
     }
   }

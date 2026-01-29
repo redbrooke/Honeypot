@@ -9,6 +9,8 @@ Setup an azure subscription, free tier is sufficient.
 
 First time setup
 
+You may need to use powershell directly instead of vscode.
+
 az login
 
 az account show
@@ -16,6 +18,8 @@ az account show
 az account list
 
 az account set --subscription "<SUBID>"
+
+Setup:
 
 az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/<SUBID>"
 
