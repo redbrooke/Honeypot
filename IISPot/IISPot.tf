@@ -125,7 +125,7 @@ resource "azurerm_windows_virtual_machine" "main" {
   location              = azurerm_resource_group.IISPotGroup.location
   resource_group_name   = azurerm_resource_group.IISPotGroup.name
   network_interface_ids = [azurerm_network_interface.IISPot_nic.id]
-  size                  = "Standard_DS1_v2"
+  size                  = "Standard_B1s" #is this valid in my region?
 
   os_disk {
     name                 = "myOsDisk"
