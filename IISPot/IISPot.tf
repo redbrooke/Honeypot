@@ -23,7 +23,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "IISPotGroup" {
   name     = "IISGroup"
-  location = "ukeast"
+  location = "North Europe"
   # NO VMS in UKWEST
   tags = {"Project" = "Honeypot"}
 }
@@ -125,7 +125,8 @@ resource "azurerm_windows_virtual_machine" "main" {
   location              = azurerm_resource_group.IISPotGroup.location
   resource_group_name   = azurerm_resource_group.IISPotGroup.name
   network_interface_ids = [azurerm_network_interface.IISPot_nic.id]
-  size                  = "Standard_B1s" #is this valid in my region?
+  size                  = "Standard_D2s_v3" #is this valid in my region?
+  # THIS IS THE MOST LIKELY PART TO BREAK!! Check out the D1s.
 
   os_disk {
     name                 = "myOsDisk"
@@ -141,9 +142,9 @@ resource "azurerm_windows_virtual_machine" "main" {
   }
 
 
-  boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.honeypot_storage_account.primary_blob_endpoint
-  }
+  #boot_diagnostics {
+  #  storage_account_uri = azurerm_storage_account.honeypot_storage_account.primary_blob_endpoint
+  #}
 }
 
 # Install IIS web server to the virtual machine
@@ -189,13 +190,13 @@ resource "random_password" "password" {
 #####################################################################
 # Create storage account for boot diagnostics
 
-resource "azurerm_storage_account" "honeypot_storage_account" {
-  name                     = "bootylogs4will"
-  location            = azurerm_resource_group.IISPotGroup.location
-  resource_group_name = azurerm_resource_group.IISPotGroup.name
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-}
+#resource "azurerm_storage_account" "honeypot_storage_account" {
+#  name                     = "bootylogs4will"
+#  location            = azurerm_resource_group.IISPotGroup.location
+#  resource_group_name = azurerm_resource_group.IISPotGroup.name
+#  account_tier             = "Standard"
+#  account_replication_type = "LRS"
+#}
 
 # Install the azure monitoring agent for windows
 # Extension as per https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension

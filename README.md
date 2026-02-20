@@ -38,6 +38,12 @@ terraform apply
 
 
 
+If VMs are not avalible in the requested size, check:
+
+az vm list-skus --location northeurope --size Standard_D --all --output table
+
+
+
 TODO:
 
 1. Consider adding a backend that writes the tfstate file to a storage blon - https://developer.hashicorp.com/terraform/language/backend/azurerm

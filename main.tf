@@ -39,7 +39,7 @@ provider "azurerm" {
 # For sentinel
 resource "azurerm_resource_group" "HoneyProject" {
   name     = "SentinelGroup"
-  location = "ukwest"
+  location = "North Europe"
   tags     = { "Project" = "Honeypot" }
 }
 
@@ -78,7 +78,7 @@ resource "azurerm_log_analytics_workspace" "law" {
 }
 
 # Puts sentinel in the LAW (log analysis workbench).
-resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel" {
+resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel_onboard" {
   #log_analytics_
   workspace_id = azurerm_log_analytics_workspace.law.id
   #customer_managed_key_enabled = false
@@ -88,9 +88,9 @@ resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel" {
 # A sample rule, ripped right from the DOCs:
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/sentinel_alert_rule_scheduled
 
-resource "azurerm_sentinel_alert_rule_scheduled" "sign_in_alert" {
+resource "azurerm_sentinel_alert_rule_scheduled" "sign_in_alert_test" {
   name                       = "sign-in-failure-alert"
-  log_analytics_workspace_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinel.workspace_id
+  log_analytics_workspace_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinel_onboard.workspace_id
   display_name               = "Multiple Sign-in Failures"
   query                      = <<QUERY
 SigninLogs
