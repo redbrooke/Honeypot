@@ -84,6 +84,11 @@ resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel_onboard
   #customer_managed_key_enabled = false
 }
 
+resource "azurerm_sentinel_data_connector_azure_security_center" "example" {
+  name                       = "example"
+  log_analytics_workspace_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinel_onboard.workspace_id
+}
+
 ########################################
 # A sample rule, ripped right from the DOCs:
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/sentinel_alert_rule_scheduled
