@@ -279,11 +279,11 @@ resource "azurerm_monitor_data_collection_rule" "dcr" {
   data_sources {
     windows_event_log {
       name    = "windows-events"
-      streams = ["Microsoft-WindowsEvent", "Microsoft-SecurityEvent", "Microsoft-Event"] #We likely dont need these DELETE SOME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      streams = ["Microsoft-WindowsEvent", "Microsoft-SecurityEvent"] #We likely dont need these DELETE SOME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       x_path_queries = [
-        "Security!*",
-        "System!*",
-        "Application!*"
+        "Security!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]",
+        "System!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]",
+        "Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]"
       ]
     }
 
@@ -301,7 +301,7 @@ resource "azurerm_monitor_data_collection_rule" "dcr" {
   }
 
   data_flow {
-    streams      = ["Microsoft-WindowsEvent", "Microsoft-SecurityEvent", "Microsoft-Event", "Microsoft-Perf"] #We likely dont need these DELETE SOME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    streams      = ["Microsoft-WindowsEvent", "Microsoft-SecurityEvent", "Microsoft-Perf"] #We likely dont need these DELETE SOME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     destinations = ["law-destination"]
   }
 }
