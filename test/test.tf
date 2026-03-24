@@ -18,6 +18,61 @@ provider "azurerm" {
   features {}
 }
 
+######################################
+# Generate a resource groups and set the location to Wales (not london): 
+
+# For sentinel
+resource "azurerm_resource_group" "HoneyProject" {
+  name     = "SentinelGroup"
+  location = "North Europe"
+  tags     = { "Project" = "Honeypot" }
+}
+
+########################################
+#Creating the Sentinel workspace, as per the docs
+# Docs - https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace
+
+resource "azurerm_log_analytics_workspace" "law" {
+  name                = "IAmTheLaw"
+  location            = azurerm_resource_group.HoneyProject.location
+  resource_group_name = azurerm_resource_group.HoneyProject.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  daily_quota_gb      = 5 # Sets a gig limit to prevent the logs getting too full
+}
+
+# Puts sentinel in the LAW (log analysis workbench).
+resource "azurerm_sentinel_log_analytics_workspace_onboarding" "sentinel_onboard" {
+  #log_analytics_
+  workspace_id = azurerm_log_analytics_workspace.law.id
+  #customer_managed_key_enabled = false
+}
+
+resource "azurerm_sentinel_data_connector_azure_security_center" "example" {
+  name                       = "example"
+  log_analytics_workspace_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinel_onboard.workspace_id
+}
+
+########################################
+# A sample rule, ripped right from the DOCs:
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/sentinel_alert_rule_scheduled
+
+resource "azurerm_sentinel_alert_rule_scheduled" "sign_in_alert_test" {
+  name                       = "sign-in-failure-alert"
+  log_analytics_workspace_id = azurerm_sentinel_log_analytics_workspace_onboarding.sentinel_onboard.workspace_id
+  display_name               = "Multiple Sign-in Failures"
+  query                      = <<QUERY
+SecurityEvent
+| where EventID == 4625
+| summarize count() by bin(TimeGenerated, 5m), TargetUserName, IpAddress
+QUERY
+  severity                   = "Medium"
+  tactics                    = ["InitialAccess"]
+  trigger_operator           = "GreaterThan"
+  trigger_threshold          = 5
+  enabled = true
+}
+
 #TODO:
 # Diagnose if the data collection rule is connected to the LAW created in the parent directory. Outputs may be needed.
 
@@ -27,12 +82,6 @@ resource "azurerm_resource_group" "IISPotGroup" {
   # NO VMS in UKWEST
   tags = {"Project" = "Honeypot"}
 }
-
-data "azurerm_log_analytics_workspace" "sentinel" {
-  name                = "IAmTheLaw"
-  resource_group_name = "SentinelGroup"
-}
-
 
 ################################################
 # Network setup
@@ -222,27 +271,37 @@ resource "azurerm_monitor_data_collection_rule" "dcr" {
 # Creates a destination for logs to be sent to. 
   destinations {
     log_analytics {
-      workspace_resource_id = data.azurerm_log_analytics_workspace.sentinel.id # SET UP THIS WITH THE PREVIOUSLY CREATED LAW azurerm_log_analytics_workspace.law.id
+      workspace_resource_id = azurerm_log_analytics_workspace.law.id # SET UP THIS WITH THE PREVIOUSLY CREATED LAW azurerm_log_analytics_workspace.law.id
       name                  = "law-destination"
     }
   }
 
-
   data_sources {
     windows_event_log {
       name    = "windows-events"
-      streams = ["Microsoft-WindowsEvent"]
-
+      streams = ["Microsoft-WindowsEvent", "Microsoft-SecurityEvent", "Microsoft-Event"] #We likely dont need these DELETE SOME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       x_path_queries = [
         "Security!*",
         "System!*",
         "Application!*"
       ]
     }
+
+  # 2? Performance counters (CPU + Memory)
+  performance_counter {
+    name    = "perf-counters"
+    streams = ["Microsoft-Perf"]
+
+    sampling_frequency_in_seconds = 60
+    counter_specifiers = [
+      "\\Processor(_Total)\\% Processor Time",
+      "\\Memory\\Available MBytes"
+    ]
+  }
   }
 
   data_flow {
-    streams      = ["Microsoft-WindowsEvent"]
+    streams      = ["Microsoft-WindowsEvent", "Microsoft-SecurityEvent", "Microsoft-Event", "Microsoft-Perf"] #We likely dont need these DELETE SOME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     destinations = ["law-destination"]
   }
 }
@@ -253,21 +312,8 @@ resource "azurerm_monitor_data_collection_rule_association" "vm_assoc" {
   name                    = "vm-dcr-association"
   target_resource_id      = azurerm_windows_virtual_machine.main.id
   data_collection_rule_id = azurerm_monitor_data_collection_rule.dcr.id
-}
 
-resource "azurerm_monitor_data_collection_endpoint" "example" {
-  name                          = "example-mdce"
-  location            = azurerm_resource_group.IISPotGroup.location
-  resource_group_name = azurerm_resource_group.IISPotGroup.name
-  kind                          = "Windows"
-  public_network_access_enabled = true
-  description                   = "monitor_data_collection_endpoint"
+  depends_on = [
+    azurerm_virtual_machine_extension.ama_windows
+  ]
 }
-
-resource "azurerm_monitor_data_collection_rule_association" "example2" {
-  target_resource_id          = azurerm_windows_virtual_machine.main.id
-  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.example.id
-  description                 = "example"
-}
-
-## IF THIS BREAKS ADD data "azurerm_log_analytics_workspace" "sentinel" 
