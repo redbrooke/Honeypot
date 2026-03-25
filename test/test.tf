@@ -281,9 +281,9 @@ resource "azurerm_monitor_data_collection_rule" "dcr" {
       name    = "windows-events"
       streams = ["Microsoft-WindowsEvent"] 
       x_path_queries = [
-        "Security!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]",
-        "System!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]",
-        "Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]"
+        "Security!*",
+        "System!*",
+        "Application!*"
       ]
     }
 
