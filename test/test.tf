@@ -231,6 +231,8 @@ resource "random_password" "password" {
   special     = true
 }
 
+
+
 #resource "random_pet" "prefix" {
 #  prefix = var.prefix
 #  length = 1
@@ -263,11 +265,19 @@ resource "azurerm_virtual_machine_extension" "ama_windows" {
 # Creates a data collection rule.
 # ref : https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule_association
 
+resource "azurerm_monitor_data_collection_endpoint" "dce" {
+  name                = "vm-dce"
+  location            = azurerm_resource_group.IISPotGroup.location
+  resource_group_name = azurerm_resource_group.IISPotGroup.name
+}
+// data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.dce.id
+
 resource "azurerm_monitor_data_collection_rule" "dcr" {
   name                = "dcr-vm-logs"
   location            = azurerm_resource_group.IISPotGroup.location
   resource_group_name = azurerm_resource_group.IISPotGroup.name
 
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.dce.id
 # Creates a destination for logs to be sent to. 
   destinations {
     log_analytics {
@@ -279,12 +289,8 @@ resource "azurerm_monitor_data_collection_rule" "dcr" {
   data_sources {
     windows_event_log {
       name    = "windows-events"
-      streams = ["Microsoft-WindowsEvent"] 
-      x_path_queries = [
-        "Security!*",
-        "System!*",
-        "Application!*"
-      ]
+      streams = ["Microsoft-Event"] 
+      x_path_queries = [  "Security!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]",  "System!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]",  "Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4)]]"]
     }
 
   # 2? Performance counters (CPU + Memory)
